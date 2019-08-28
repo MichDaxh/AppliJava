@@ -19,7 +19,7 @@ CREATE TABLE membership
         CONSTRAINT CHECK(id_player > 0),
         CONSTRAINT CHECK(id_team > 0),
         CONSTRAINT CHECK(entry_date < leave_date),
-        CONSTRAINT PRIMARY KEY (id_player, id_tam)
+        CONSTRAINT PRIMARY KEY (id_player, id_team)
     )ENGINE = InnoDB;
 
 CREATE TABLE team 
@@ -64,7 +64,6 @@ CREATE TABLE event
         caster3_name VARCHAR(25),
         caster4_name VARCHAR(25),
         caster5_name VARCHAR(25),
-        CONSTRAINT CHECK(id_team > 0),
         CONSTRAINT CHECK(nb_team > 1),        
         CONSTRAINT CHECK(cash_prize > 0),
         CONSTRAINT CHECK(start_date < end_date)
