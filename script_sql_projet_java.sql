@@ -7,8 +7,7 @@ CREATE TABLE player
         birthday      DATE NOT NULL,
         nationality   VARCHAR(25) NOT NULL,
         isBench       boolean NOT NULL,
-        CHECK (CURRENT_DATE() > birthday),
-        CHECK (id_player > 0)   
+        CONSTRAINT CHECK (id_player > 0)   
     )ENGINE = InnoDB;
 
 CREATE TABLE membership
@@ -17,9 +16,10 @@ CREATE TABLE membership
         id_team INT(4)  NOT NULL REFERENCES team(id_team),
         entry_date DATE NOT NULL,
         leave_date DATE ,
-        CHECK(id_player > 0),
-        CHECK(id_team > 0),
-        CHECK(entry_date < leave_date)
+        CONSTRAINT CHECK(id_player > 0),
+        CONSTRAINT CHECK(id_team > 0),
+        CONSTRAINT CHECK(entry_date < leave_date),
+        CONSTRAINT PRIMARY KEY (id_player, id_tam)
     )ENGINE = InnoDB;
 
 CREATE TABLE team 
@@ -27,8 +27,8 @@ CREATE TABLE team
         id_team INT(4) PRIMARY KEY NOT NULL,
         team_name VARCHAR(25) NOT NULL,
         world_ranking INT(4) UNIQUE,
-        CHECK(id_team > 0),
-        CHECK(world_ranking > 0)
+        CONSTRAINT CHECK(id_team > 0),
+        CONSTRAINT CHECK(world_ranking > 0)
     )
     ENGINE =  InnoDB;
 
@@ -36,10 +36,11 @@ CREATE TABLE participation
     (
         id_team INT(4) NOT NULL REFERENCES team(id_team),
         id_event INT(4) NOT NULL REFERENCES event(id_event),
-        ranking INT(4) UNIQUE NOT NULL,
-        CHECK(id_team > 0),
-        CHECK(id_event > 0),
-        CHECK(ranking > 0),
+        ranking INT(4) NOT NULL,
+        CONSTRAINT primary key (id_team, id_event, ranking),
+        CONSTRAINT CHECK(id_team > 0),
+        CONSTRAINT CHECK(id_event > 0),
+        CONSTRAINT CHECK(ranking > 0)
     )
     ENGINE =  InnoDB;
 
@@ -63,10 +64,10 @@ CREATE TABLE event
         caster3_name VARCHAR(25),
         caster4_name VARCHAR(25),
         caster5_name VARCHAR(25),
-        CHECK(id_team > 0),
-        CHECK(nb_team > 1),        
-        CHECK(cash_prize > 0),
-        CHECK(start_date < end_date)
+        CONSTRAINT CHECK(id_team > 0),
+        CONSTRAINT CHECK(nb_team > 1),        
+        CONSTRAINT CHECK(cash_prize > 0),
+        CONSTRAINT CHECK(start_date < end_date)
     )ENGINE = InnoDB;
 
 CREATE TABLE showdown
@@ -74,9 +75,10 @@ CREATE TABLE showdown
         id_match INT(4) NOT NULL,
         id_team1 INT(4) NOT NULL REFERENCES team(id_team),
         id_team2 INT (4) NOT NULL REFERENCES team(id_team),
-        CHECK(id_match > 0),
-        CHECK(id_team1 > 0),
-        CHECK(id_team2 > 0)
+        CONSTRAINT PRIMARY key (id_match, id_team1, id_team2),
+        CONSTRAINT CHECK(id_match > 0),
+        CONSTRAINT CHECK(id_team1 > 0),
+        CONSTRAINT CHECK(id_team2 > 0)
      )ENGINE = InnoDB;
 
 CREATE TABLE game
@@ -85,8 +87,8 @@ CREATE TABLE game
         match_format VARCHAR(15),
         start_date DATE NOT NULL, 
         id_event INT(4) NOT NULL REFERENCES event(id_event),
-        CHECK(id_match > 0),
-        CHECK(id_event > 0)
+        CONSTRAINT CHECK(id_match > 0),
+        CONSTRAINT CHECK(id_event > 0)
     )ENGINE = InnoDB;
 
 CREATE TABLE result
@@ -95,10 +97,11 @@ CREATE TABLE result
         map_name VARCHAR(25)  NOT NULL REFERENCES mappool(name),
         result_team1 INT(4) NOT NULL,
         result_team2 INT (4) NOT NULL,
-        CHECK(id_match > 0),
-        CHECK(result_team1 > 0), 
-        CHECK(result_team2 > 0),
-        CHECK(result_team1 + result_team2 = 30)
+        CONSTRAINT PRIMARY key (id_match, map_name),
+        CONSTRAINT CHECK(id_match > 0),
+        CONSTRAINT CHECK(result_team1 > 0), 
+        CONSTRAINT CHECK(result_team2 > 0),
+        CONSTRAINT CHECK(result_team1 + result_team2 = 30)
      )ENGINE = InnoDB;    
 
 CREATE TABLE mappool
@@ -145,7 +148,7 @@ INSERT INTO player VALUES
 );
 INSERT INTO player VALUES
 (
-    8, 'Richard', 'Papillon', 'shox', str_to_date('04-AVR-1995', '%e-%b-%Y'),
+    8, 'Richard', 'Papillon', 'shox', str_to_date('04-APR-1995', '%e-%b-%Y'),
     'french', false
 );
 INSERT INTO player VALUES
@@ -206,7 +209,7 @@ INSERT INTO team VALUES
 );
 INSERT INTO team VALUES
 (
-    2, 'G2'
+    2, 'G2', null
 );
 INSERT INTO team VALUES
 (
@@ -218,7 +221,6 @@ INSERT INTO team VALUES
     4,'Navi', 3
 );
 
-//team vitality
 INSERT INTO membership VALUES
 (1, 1, str_to_date('01-OCT-2018', '%e-%b-%Y'), null);
 INSERT INTO membership VALUES
@@ -230,7 +232,6 @@ INSERT INTO membership VALUES
 INSERT INTO membership VALUES
 (6, 1, str_to_date('01-OCT-2018', '%e-%b-%Y'), null);
 
-//team G2
 INSERT INTO membership VALUES
 (7, 2, str_to_date('01-OCT-2018', '%e-%b-%Y'), null);
 INSERT INTO membership VALUES
@@ -242,7 +243,6 @@ INSERT INTO membership VALUES
 INSERT INTO membership VALUES
 (11, 2, str_to_date('01-OCT-2018', '%e-%b-%Y'), null);
 
-//team Astralis
 INSERT INTO membership VALUES
 (12, 3, str_to_date('01-OCT-2018', '%e-%b-%Y'), null);
 INSERT INTO membership VALUES
@@ -277,11 +277,11 @@ VALUES ('Starladder Saison 2', 16, 150000, 'Paris', str_to_date('19-JUN-2015', '
 Insert into event (event_name, nb_team, cash_prize, locality, start_date, end_date, isMajor, sponsor1, caster1_name)
 VALUES ('Starladder Saison 1', 16, 100000, 'Paris', str_to_date('19-JUN-2014', '%e-%b-%Y'), str_to_date('29-Jun-2014', '%e-%b-%Y'), true, 'Apple', 'Cnd');
 Insert into event (event_name, nb_team, cash_prize, locality, start_date, end_date, isMajor, sponsor1, caster1_name)
-VALUES ('Dreamhack ', 16, 100000, 'Marseille', str_to_date('07-MAI-2017', '%e-%b-%Y'), str_to_date('17-Mai-2017', '%e-%b-%Y'), false, 'Corsair', 'Andre');
+VALUES ('Dreamhack ', 16, 100000, 'Marseille', str_to_date('07-MAY-2017', '%e-%b-%Y'), str_to_date('17-MAY-2017', '%e-%b-%Y'), false, 'Corsair', 'Andre');
 Insert into event (event_name, nb_team, cash_prize, locality, start_date, end_date, isMajor, sponsor1, caster1_name)
-VALUES ('Dreamhack ', 16, 150000, 'Marseille', str_to_date('07-MAI-2018', '%e-%b-%Y'), str_to_date('17-Mai-2018', '%e-%b-%Y'), false, 'MSI', 'Maniac');
+VALUES ('Dreamhack ', 16, 150000, 'Marseille', str_to_date('07-MAY-2018', '%e-%b-%Y'), str_to_date('17-MAY-2018', '%e-%b-%Y'), false, 'MSI', 'Maniac');
 Insert into event (event_name, nb_team, cash_prize, locality, start_date, end_date, isMajor, sponsor1, caster1_name)
-VALUES ('Dreamhack ', 16, 200000, 'Marseille', str_to_date('07-MAI-2019', '%e-%b-%Y'), str_to_date('17-Mai-2019', '%e-%b-%Y'), false, 'Corsair', 'Andre');
+VALUES ('Dreamhack ', 16, 200000, 'Marseille', str_to_date('07-MAY-2019', '%e-%b-%Y'), str_to_date('17-MAY-2019', '%e-%b-%Y'), false, 'Corsair', 'Andre');
 Insert into event (event_name, nb_team, cash_prize, locality, start_date, end_date, isMajor, sponsor1, caster1_name)
 VALUES ('E', 16, 200000, 'Cologne', str_to_date('01-JUN-2019', '%e-%b-%Y'), str_to_date('09-Jun-2019', '%e-%b-%Y'), false, 'MSI', 'Manu');
 Insert into event (event_name, nb_team, cash_prize, locality, start_date, end_date, isMajor, sponsor1, caster1_name)
@@ -373,16 +373,6 @@ INSERT into participation VALUES
 (1, 10, 1);
 INSERT into participation VALUES
 (2, 10, 2);
-INSERT into participation VALUES
-(3, 10, 3);
-INSERT into participation VALUES
-(4, 10, 8);
-INSERT into participation VALUES
-(5, 10, 16);
-INSERT into participation VALUES
-(1, 10, 1);
-INSERT into participation VALUES
-(2,10, 2);
 INSERT into participation VALUES
 (3, 10, 3);
 INSERT into participation VALUES
